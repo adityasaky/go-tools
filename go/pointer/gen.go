@@ -1130,19 +1130,22 @@ func (a *analysis) genRootCalls() *cgnode {
 
 	// For each main package, call main.init(), main.main().
 	for _, mainPkg := range a.config.Mains {
-		main := mainPkg.Func("main")
-		if main == nil {
-			panic(fmt.Sprintf("%s has no main function", mainPkg))
-		}
-
-		targets := a.addOneNode(main.Signature, "root.targets", nil)
-		site := &callsite{targets: targets}
-		root.sites = append(root.sites, site)
-		for _, fn := range [2]*ssa.Function{mainPkg.Func("init"), main} {
-			if a.log != nil {
-				fmt.Fprintf(a.log, "\troot call to %s:\n", fn)
+		allFunctions := []*ssa.Function{}
+		for _, v := range mainPkg.Members {
+			if v.Token() == token.FUNC {
+				allFunctions = append(allFunctions, v.(*ssa.Function))
 			}
-			a.copy(targets, a.valueNode(fn), 1)
+		}
+		for _, f := range allFunctions {
+			targets := a.addOneNode(f.Signature, "root.targets", nil)
+			site := &callsite{targets: targets}
+			root.sites = append(root.sites, site)
+			for _, fn := range [2]*ssa.Function{mainPkg.Func("init"), f} {
+				if a.log != nil {
+					fmt.Fprintf(a.log, "\troot call to %s:\n", fn)
+				}
+				a.copy(targets, a.valueNode(fn), 1)
+			}
 		}
 	}
 

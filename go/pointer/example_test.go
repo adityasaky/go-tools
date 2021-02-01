@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/adityasaky/go-tools/go/pointer"
 	"golang.org/x/tools/go/callgraph"
 	"golang.org/x/tools/go/loader"
-	"golang.org/x/tools/go/pointer"
 	"golang.org/x/tools/go/ssa"
 	"golang.org/x/tools/go/ssa/ssautil"
 )
